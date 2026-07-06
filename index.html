@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Helpdesk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F7F8FA;
+    --surface:#FFFFFF;
+    --ink:#131B2E;
+    --ink-soft:#5C6B85;
+    --border:#DEE3EC;
+    --accent:#2D5BFF;
+    --accent-soft:#EAF0FF;
+    --amber:#E8833A;
+    --amber-soft:#FCEEE1;
+    --green:#1FA971;
+    --green-soft:#E5F7EE;
+    --red:#E23D3D;
+    --red-soft:#FCE9E9;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  .app{
+    max-width:760px;
+    margin:0 auto;
+    padding:28px 20px 60px;
+  }
+  /* Accessible keyboard focus */
+  :focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+  /* Header / nav */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    flex-wrap:wrap;
+    margin-bottom:24px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .brand .dot{
+    width:10px;height:10px;border-radius:50%;
+    background:var(--green);
+    box-shadow:0 0 0 4px var(--green-soft);
+  }
+  .brand-text{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;
+    font-size:18px;
+    letter-spacing:-0.01em;
+  }
+  .brand-text span{color:var(--accent);}
+  .nav-tabs{
+    display:flex;
+    gap:4px;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:4px;
+  }
+  .nav-tabs button{
+    border:none;
+    background:transparent;
+    padding:8px 14px;
+    border-radius:7px;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .nav-tabs button.active{
+    background:var(--accent);
+    color:#fff;
+  }
+
+  /* Chat view */
+  .chat-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:0;
+    overflow:hidden;
+    box-shadow:0 1px 3px rgba(19,27,46,0.04);
+  }
+  .chat-log{
+    padding:24px 22px 8px;
+    max-height:56vh;
+    overflow-y:auto;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .msg{
+    display:flex;
+    gap:10px;
+    max-width:88%;
+    animation:rise .28s ease;
+  }
+  @keyframes rise{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+  .msg.bot{align-self:flex-start;}
+  .msg.user{align-self:flex-end;flex-direction:row-reverse;}
+  .avatar{
+    flex-shrink:0;
+    width:28px;height:28px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;font-weight:700;
+    font-family:'Space Grotesk',sans-serif;
+  }
+  .msg.bot .avatar{background:var(--accent-soft);color:var(--accent);}
+  .msg.user .avatar{background:var(--ink);color:#fff;}
+  .bubble{
+    padding:10px 14px;
+    border-radius:12px;
+    font-size:14.5px;
+    line-height:1.55;
+  }
+  .msg.bot .bubble{background:var(--bg);border:1px solid var(--border);border-top-right-radius:3px;}
+  .msg.user .bubble{background:var(--accent);color:#fff;border-top-left-radius:3px;}
+
+  .choice-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    padding:2px 22px 18px;
+  }
+  .choice-btn{
+    border:1px solid var(--border);
+    background:var(--surface);
+    padding:9px 15px;
+    border-radius:10px;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    font-weight:600;
+    color:var(--ink);
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .choice-btn:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft);}
+
+  .composer{
+    border-top:1px solid var(--border);
+    padding:14px 18px;
+    display:flex;
+    gap:10px;
+    align-items:flex-end;
+    background:var(--surface);
+  }
+  .composer textarea, .composer input{
+    flex:1;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:11px 13px;
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    resize:none;
+    outline:none;
+    background:var(--bg);
+    color:var(--ink);
+    min-height:44px;
+  }
+  .composer textarea:focus, .composer input:focus{border-color:var(--accent);background:var(--surface);}
+  .send-btn{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    width:44px;height:44px;
+    border-radius:10px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;
+    transition:opacity .15s;
+    font-size:16px;
+  }
+  .send-btn:hover{opacity:.88;}
+  .send-btn:disabled{opacity:.4;cursor:not-allowed;}
+
+  /* Ticket confirmation card */
+  .ticket-done{
+    padding:22px;
+    text-align:center;
+  }
+  .ticket-id{
+    font-family:'JetBrains Mono',monospace;
+    font-size:26px;
+    font-weight:600;
+    color:var(--accent);
+    letter-spacing:0.02em;
+    margin:10px 0 4px;
+  }
+  .ticket-done p{color:var(--ink-soft);font-size:13.5px;margin:0;}
+  .id-copy{
+    display:inline-flex;align-items:center;gap:8px;
+    margin:6px 0 2px;
+  }
+  .copy-btn{
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--ink-soft);
+    border-radius:8px;
+    padding:5px 10px;
+    font-size:12px;font-weight:600;
+    cursor:pointer;
+  }
+  .copy-btn:hover{border-color:var(--accent);color:var(--accent);}
+  .new-ticket-btn{
+    margin-top:16px;
+    background:var(--ink);
+    color:#fff;
+    border:none;
+    padding:10px 20px;
+    border-radius:10px;
+    font-weight:600;
+    font-size:13.5px;
+    cursor:pointer;
+  }
+
+  /* Dashboard */
+  .pin-gate{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:40px 24px;
+    text-align:center;
+  }
+  .pin-gate .lock-title{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:700;font-size:17px;
+  }
+  .pin-gate input{
+    margin-top:16px;
+    width:140px;
+    text-align:center;
+    letter-spacing:6px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:20px;
+    padding:10px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    outline:none;
+  }
+  .pin-gate input:focus{border-color:var(--accent);}
+  .pin-gate button{
+    display:block;
+    margin:16px auto 0;
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:10px 22px;
+    border-radius:10px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .pin-hint{font-size:12px;color:var(--ink-soft);margin-top:10px;}
+
+  .dash-stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .stat-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px;
+  }
+  .stat-num{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:700;}
+  .stat-label{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+
+  .dash-toolbar{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .dash-search{
+    flex:1;
+    min-width:180px;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:9px 13px;
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    background:var(--surface);
+    color:var(--ink);
+    outline:none;
+  }
+  .dash-search:focus{border-color:var(--accent);}
+  .lock-btn{
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--ink-soft);
+    padding:9px 14px;
+    border-radius:10px;
+    font-size:12.5px;font-weight:600;
+    cursor:pointer;
+  }
+  .lock-btn:hover{border-color:var(--red);color:var(--red);}
+
+  .filter-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  .filter-btn{
+    border:1px solid var(--border);
+    background:var(--surface);
+    padding:6px 13px;
+    border-radius:8px;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .filter-btn.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+  .ticket-row{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:14px 16px;
+    margin-bottom:10px;
+    transition:border-color .15s;
+  }
+  .ticket-row:hover{border-color:var(--accent);}
+  .ticket-row-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:10px;
+  }
+  .ticket-row-left{display:flex;align-items:center;gap:10px;}
+  .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+  .ticket-meta{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-soft);}
+  .ticket-name{font-weight:600;font-size:14px;}
+  .priority-tag{
+    font-size:10.5px;
+    font-weight:700;
+    padding:3px 8px;
+    border-radius:6px;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    flex-shrink:0;
+  }
+  .ticket-desc{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-top:8px;
+    line-height:1.5;
+    white-space:pre-wrap;
+  }
+  .ticket-expand{
+    margin-top:12px;
+    padding-top:12px;
+    border-top:1px solid var(--border);
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .expand-label{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-right:2px;}
+  .status-btn{
+    border:1px solid var(--border);
+    background:var(--bg);
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:12px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .status-btn.selected{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .delete-btn{
+    margin-left:auto;
+    border:1px solid var(--border);
+    background:var(--surface);
+    color:var(--ink-soft);
+    padding:6px 12px;
+    border-radius:8px;
+    font-size:12px;font-weight:600;
+    cursor:pointer;
+  }
+  .delete-btn:hover{border-color:var(--red);color:var(--red);background:var(--red-soft);}
+  .empty-state{
+    text-align:center;
+    padding:50px 20px;
+    color:var(--ink-soft);
+  }
+  .loading-state{text-align:center;padding:40px;color:var(--ink-soft);font-size:13.5px;}
+
+  @media (max-width:560px){
+    .app{padding:20px 14px 48px;}
+    .dash-stats{grid-template-columns:repeat(2,1fr);}
+    .nav-tabs{width:100%;}
+    .nav-tabs button{flex:1;}
+    .msg{max-width:95%;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .msg{animation:none;}
+    *{transition:none !important;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="dot"></div>
+      <div class="brand-text">IT<span>Helpdesk</span></div>
+    </div>
+    <div class="nav-tabs">
+      <button id="tabChat" class="active">Report a Problem</button>
+      <button id="tabDash">Dashboard</button>
+    </div>
+  </div>
+
+  <div id="chatView"></div>
+  <div id="dashView" style="display:none;"></div>
+</div>
+
+<script>
+/* ================= CONFIG ================= */
+const ADMIN_PIN = "1234"; // Change this to your own PIN.
+
+// Paste your Google Apps Script Web App URL between the quotes to turn on
+// email notifications + a shared ticket list for the whole team.
+// Leave it blank to keep tickets on this device only (no email).
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyYNKrMUd2-ZhTCGSORPiyWyWVE7eQukSiCV1N_bcT9iGR1pe-hwx4JsRxAbTq3yDBvdw/exec";
+
+const CATEGORIES = ["Internet", "Laptop", "Headset", "Mouse", "Charger"];
+const PRIORITIES = [
+  {label:"Low", color:"var(--green)"},
+  {label:"Medium", color:"var(--amber)"},
+  {label:"High", color:"var(--red)"},
+  {label:"Urgent", color:"var(--red)"}
+];
+const STATUSES = ["Open","In Progress","Resolved"];
+
+/* ================= DATA LAYER =================
+   Two modes, chosen automatically:
+   - BACKEND mode (SCRIPT_URL is set): tickets live in one Google Sheet
+     via Apps Script, shared across everyone, and an email is sent to
+     the IT inbox on each new ticket. Set the recipient in the script.
+   - LOCAL mode (SCRIPT_URL blank): tickets stay in this browser only,
+     no email. Handy for a quick test with zero setup.
+*/
+const USING_BACKEND = SCRIPT_URL.trim().length > 0;
+
+// POST helper. Apps Script + a static page can't share cookies, so we
+// use a "fire and forget" POST (no-cors) with a plain-text body, which
+// avoids browser CORS preflight blocks. We can't read the reply, so the
+// UI assumes success — the same approach your audit forms use.
+async function backendPost(payload){
+  await fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(payload)
+  });
+  return true;
+}
+
+async function dbCreate(ticket){
+  if(USING_BACKEND) return backendPost({ action:'create', ticket });
+  localStorage.setItem('ticket:' + ticket.id, JSON.stringify(ticket));
+  return true;
+}
+
+async function dbList(){
+  if(USING_BACKEND){
+    const res = await fetch(SCRIPT_URL + '?action=list&t=' + Date.now());
+    const data = await res.json();
+    return Array.isArray(data) ? data : (data.tickets || []);
+  }
+  const tickets = [];
+  for(let i=0;i<localStorage.length;i++){
+    const k = localStorage.key(i);
+    if(k && k.indexOf('ticket:') === 0){
+      try{ tickets.push(JSON.parse(localStorage.getItem(k))); }catch(e){ /* skip */ }
+    }
+  }
+  return tickets;
+}
+
+async function dbStatus(id, status){
+  if(USING_BACKEND) return backendPost({ action:'status', id, status });
+  const k = 'ticket:' + id;
+  const v = localStorage.getItem(k);
+  if(v){ const t = JSON.parse(v); t.status = status; localStorage.setItem(k, JSON.stringify(t)); }
+  return true;
+}
+
+async function dbDelete(id){
+  if(USING_BACKEND) return backendPost({ action:'delete', id });
+  localStorage.removeItem('ticket:' + id);
+  return true;
+}
+
+let state = { name:"", contact:"", category:"", priority:"", description:"" };
+let ticketsCache = [];
+let dashUnlocked = false;
+let activeFilter = "All";
+let searchTerm = "";
+
+const chatView = document.getElementById('chatView');
+const dashView = document.getElementById('dashView');
+const tabChat = document.getElementById('tabChat');
+const tabDash = document.getElementById('tabDash');
+
+tabChat.onclick = () => switchTab('chat');
+tabDash.onclick = () => switchTab('dash');
+
+function switchTab(tab){
+  if(tab === 'chat'){
+    tabChat.classList.add('active'); tabDash.classList.remove('active');
+    chatView.style.display=''; dashView.style.display='none';
+  } else {
+    tabDash.classList.add('active'); tabChat.classList.remove('active');
+    chatView.style.display='none'; dashView.style.display='';
+    renderDash();
+  }
+}
+
+/* ---------------- CHAT FLOW ---------------- */
+function renderChatShell(){
+  chatView.innerHTML = `
+    <div class="chat-card">
+      <div class="chat-log" id="chatLog"></div>
+      <div id="chatFooter"></div>
+    </div>
+  `;
+}
+
+function pushBotMsg(text){
+  const log = document.getElementById('chatLog');
+  const div = document.createElement('div');
+  div.className = 'msg bot';
+  div.innerHTML = `<div class="avatar">IT</div><div class="bubble">${text}</div>`;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+function pushUserMsg(text){
+  const log = document.getElementById('chatLog');
+  const div = document.createElement('div');
+  div.className = 'msg user';
+  div.innerHTML = `<div class="avatar">You</div><div class="bubble">${escapeHtml(text)}</div>`;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+function escapeHtml(str){
+  const d = document.createElement('div');
+  d.innerText = str == null ? "" : String(str);
+  return d.innerHTML;
+}
+
+function startChat(){
+  state = { name:"", contact:"", category:"", priority:"", description:"" };
+  renderChatShell();
+  pushBotMsg("Hi there! 👋 I'm your IT Support Assistant. Let's get your issue logged.");
+  setTimeout(()=>{ pushBotMsg("First, what's your name?"); showTextInput("Type your name...", handleName); }, 350);
+}
+
+function showTextInput(placeholder, onSubmit, multiline=false){
+  const footer = document.getElementById('chatFooter');
+  footer.innerHTML = `
+    <div class="composer">
+      ${multiline ? `<textarea id="composerInput" placeholder="${placeholder}" rows="2"></textarea>` : `<input id="composerInput" type="text" placeholder="${placeholder}" />`}
+      <button class="send-btn" id="sendBtn" aria-label="Send">➤</button>
+    </div>
+  `;
+  const input = document.getElementById('composerInput');
+  const btn = document.getElementById('sendBtn');
+  input.focus();
+  const submit = () => {
+    const val = input.value.trim();
+    if(!val) return;
+    onSubmit(val);
+  };
+  btn.onclick = submit;
+  input.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter' && !e.shiftKey){ e.preventDefault(); submit(); }
+  });
+}
+
+function showChoices(options, onPick){
+  const footer = document.getElementById('chatFooter');
+  footer.innerHTML = `<div class="choice-row" id="choiceRow"></div>`;
+  const row = document.getElementById('choiceRow');
+  options.forEach(opt => {
+    const b = document.createElement('button');
+    b.className = 'choice-btn';
+    b.innerText = typeof opt === 'string' ? opt : opt.label;
+    b.onclick = () => onPick(typeof opt === 'string' ? opt : opt.label);
+    row.appendChild(b);
+  });
+}
+
+function handleName(val){
+  state.name = val;
+  pushUserMsg(val);
+  document.getElementById('chatFooter').innerHTML = '';
+  setTimeout(()=>{
+    pushBotMsg(`Thanks, ${escapeHtml(val)}! What's your email or phone number, so we can reach you?`);
+    showTextInput("Email or phone number...", handleContact);
+  }, 300);
+}
+
+function handleContact(val){
+  state.contact = val;
+  pushUserMsg(val);
+  document.getElementById('chatFooter').innerHTML = '';
+  setTimeout(()=>{
+    pushBotMsg("What's your issue related to?");
+    showChoices(CATEGORIES, handleCategory);
+  }, 300);
+}
+
+function handleCategory(val){
+  state.category = val;
+  pushUserMsg(val);
+  document.getElementById('chatFooter').innerHTML = '';
+  setTimeout(()=>{
+    pushBotMsg("How urgent is this?");
+    showChoices(PRIORITIES, handlePriority);
+  }, 300);
+}
+
+function handlePriority(val){
+  state.priority = val;
+  pushUserMsg(val);
+  document.getElementById('chatFooter').innerHTML = '';
+  setTimeout(()=>{
+    pushBotMsg("Now describe the problem in detail — what's happening, and since when?");
+    showTextInput("Describe your issue here...", handleDescription, true);
+  }, 300);
+}
+
+async function handleDescription(val){
+  state.description = val;
+  pushUserMsg(val);
+  document.getElementById('chatFooter').innerHTML = '<div class="loading-state">Saving your ticket...</div>';
+  await submitTicket();
+}
+
+async function submitTicket(){
+  const now = new Date();
+  const id = generateTicketId(now);
+  const ticket = {
+    id,
+    name: state.name,
+    contact: state.contact,
+    category: state.category,
+    priority: state.priority,
+    description: state.description,
+    status: "Open",
+    createdAt: now.toISOString()
+  };
+  try{
+    const result = await dbCreate(ticket);
+    if(!result){ throw new Error("Save failed"); }
+    setTimeout(()=>{
+      pushBotMsg("Your ticket has been logged successfully! ✅");
+      const footer = document.getElementById('chatFooter');
+      footer.innerHTML = `
+        <div class="ticket-done">
+          <p>Your Ticket ID</p>
+          <div class="ticket-id" id="ticketIdText">${id}</div>
+          <div class="id-copy"><button class="copy-btn" id="copyIdBtn">Copy ID</button></div>
+          <p>Our team will get back to you shortly. This ticket will also stay updated on the Dashboard.</p>
+          <button class="new-ticket-btn" id="newTicketBtn">Report another issue</button>
+        </div>
+      `;
+      document.getElementById('newTicketBtn').onclick = startChat;
+      const copyBtn = document.getElementById('copyIdBtn');
+      copyBtn.onclick = async () => {
+        try{
+          await navigator.clipboard.writeText(id);
+          copyBtn.innerText = "Copied";
+          setTimeout(()=>{ copyBtn.innerText = "Copy ID"; }, 1500);
+        }catch(e){ copyBtn.innerText = "Copy failed"; }
+      };
+    }, 300);
+  }catch(err){
+    document.getElementById('chatFooter').innerHTML = `<div class="loading-state">We couldn't save your ticket. Please try again. <button class="new-ticket-btn" id="retryBtn">Retry</button></div>`;
+    document.getElementById('retryBtn').onclick = submitTicket;
+    console.error(err);
+  }
+}
+
+function generateTicketId(date){
+  const yy = String(date.getFullYear()).slice(2);
+  const mm = String(date.getMonth()+1).padStart(2,'0');
+  const rand = Math.floor(1000 + Math.random()*9000);
+  return `TCK-${yy}${mm}-${rand}`;
+}
+
+/* ---------------- DASHBOARD ---------------- */
+function renderDash(){
+  if(!dashUnlocked){
+    dashView.innerHTML = `
+      <div class="pin-gate">
+        <div class="lock-title">Dashboard locked 🔒</div>
+        <input id="pinInput" type="password" maxlength="4" inputmode="numeric" placeholder="••••" />
+        <button id="pinBtn">Unlock</button>
+        <p class="pin-hint">Enter the admin PIN to view tickets.</p>
+        <p class="pin-hint" id="pinError" style="color:var(--red);"></p>
+      </div>
+    `;
+    const btn = document.getElementById('pinBtn');
+    const input = document.getElementById('pinInput');
+    const tryUnlock = () => {
+      if(input.value === ADMIN_PIN){ dashUnlocked = true; renderDash(); }
+      else { document.getElementById('pinError').innerText = "Incorrect PIN, please try again."; input.value=""; input.focus(); }
+    };
+    btn.onclick = tryUnlock;
+    input.addEventListener('keydown', e => { if(e.key==='Enter') tryUnlock(); });
+    input.focus();
+    return;
+  }
+
+  dashView.innerHTML = `<div class="loading-state">Loading tickets...</div>`;
+  loadTickets();
+}
+
+async function loadTickets(){
+  try{
+    const tickets = await dbList();
+    tickets.sort((a,b)=> new Date(b.createdAt) - new Date(a.createdAt));
+    ticketsCache = tickets;
+    renderDashBody();
+  }catch(err){
+    dashView.innerHTML = `<div class="empty-state">Couldn't load tickets. <br><button class="new-ticket-btn" id="reloadBtn" style="margin-top:12px;">Retry</button></div>`;
+    document.getElementById('reloadBtn').onclick = renderDash;
+    console.error(err);
+  }
+}
+
+function renderDashBody(){
+  const total = ticketsCache.length;
+  const open = ticketsCache.filter(t=>t.status==='Open').length;
+  const inProgress = ticketsCache.filter(t=>t.status==='In Progress').length;
+  const resolved = ticketsCache.filter(t=>t.status==='Resolved').length;
+
+  let filtered = activeFilter === 'All' ? ticketsCache : ticketsCache.filter(t=>t.status===activeFilter);
+  if(searchTerm){
+    const q = searchTerm.toLowerCase();
+    filtered = filtered.filter(t =>
+      [t.name,t.category,t.id,t.description,t.contact,t.priority]
+        .some(f => String(f||"").toLowerCase().includes(q))
+    );
+  }
+
+  dashView.innerHTML = `
+    <div class="dash-stats">
+      <div class="stat-card"><div class="stat-num">${total}</div><div class="stat-label">Total</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--amber);">${open}</div><div class="stat-label">Open</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--accent);">${inProgress}</div><div class="stat-label">In Progress</div></div>
+      <div class="stat-card"><div class="stat-num" style="color:var(--green);">${resolved}</div><div class="stat-label">Resolved</div></div>
+    </div>
+    <div class="dash-toolbar">
+      <input class="dash-search" id="dashSearch" type="text" placeholder="Search name, ID, category..." value="${escapeHtml(searchTerm)}" />
+      <button class="lock-btn" id="lockBtn">Lock</button>
+    </div>
+    <div class="filter-row" id="filterRow"></div>
+    <div id="ticketList"></div>
+  `;
+
+  const searchInput = document.getElementById('dashSearch');
+  searchInput.oninput = (e) => { searchTerm = e.target.value; renderDashBody(); };
+  // keep focus + caret at end after re-render
+  searchInput.focus();
+  searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+
+  document.getElementById('lockBtn').onclick = () => { dashUnlocked = false; searchTerm=""; activeFilter="All"; renderDash(); };
+
+  const filterRow = document.getElementById('filterRow');
+  ["All","Open","In Progress","Resolved"].forEach(f=>{
+    const b = document.createElement('button');
+    b.className = 'filter-btn' + (activeFilter===f ? ' active':'');
+    b.innerText = f;
+    b.onclick = () => { activeFilter = f; renderDashBody(); };
+    filterRow.appendChild(b);
+  });
+
+  const list = document.getElementById('ticketList');
+  if(filtered.length === 0){
+    list.innerHTML = `<div class="empty-state">${total === 0 ? "No tickets yet. Reported issues will appear here." : "No tickets match this view."}</div>`;
+    return;
+  }
+
+  filtered.forEach(ticket => {
+    const row = document.createElement('div');
+    row.className = 'ticket-row';
+    const statusColor = ticket.status==='Open' ? 'var(--amber)' : ticket.status==='In Progress' ? 'var(--accent)' : 'var(--green)';
+    const priorityBg = ticket.priority==='Urgent' || ticket.priority==='High' ? 'var(--red-soft)' : ticket.priority==='Medium' ? 'var(--amber-soft)' : 'var(--green-soft)';
+    const priorityColor = ticket.priority==='Urgent' || ticket.priority==='High' ? 'var(--red)' : ticket.priority==='Medium' ? 'var(--amber)' : 'var(--green)';
+    const dateStr = new Date(ticket.createdAt).toLocaleString('en-GB', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+
+    row.innerHTML = `
+      <div class="ticket-row-top">
+        <div class="ticket-row-left">
+          <div class="status-dot" style="background:${statusColor};"></div>
+          <div>
+            <div class="ticket-name">${escapeHtml(ticket.name)} · ${escapeHtml(ticket.category)}</div>
+            <div class="ticket-meta">${escapeHtml(ticket.id)} · ${dateStr}</div>
+          </div>
+        </div>
+        <div class="priority-tag" style="background:${priorityBg};color:${priorityColor};">${escapeHtml(ticket.priority)}</div>
+      </div>
+      <div class="ticket-desc">${escapeHtml(ticket.description)}</div>
+      <div class="ticket-meta" style="margin-top:6px;">Contact: ${escapeHtml(ticket.contact)}</div>
+      <div class="ticket-expand"><span class="expand-label">Set status:</span></div>
+    `;
+    const expand = row.querySelector('.ticket-expand');
+    STATUSES.forEach(s => {
+      const sb = document.createElement('button');
+      sb.className = 'status-btn' + (ticket.status===s ? ' selected':'');
+      sb.innerText = s;
+      sb.onclick = async (e) => {
+        e.stopPropagation();
+        ticket.status = s;
+        try{
+          await dbStatus(ticket.id, s);
+          renderDashBody();
+        }catch(err){ console.error(err); }
+      };
+      expand.appendChild(sb);
+    });
+
+    const del = document.createElement('button');
+    del.className = 'delete-btn';
+    del.innerText = 'Delete';
+    del.onclick = async (e) => {
+      e.stopPropagation();
+      if(!confirm(`Delete ticket ${ticket.id}? This cannot be undone.`)) return;
+      try{
+        await dbDelete(ticket.id);
+        ticketsCache = ticketsCache.filter(t => t.id !== ticket.id);
+        renderDashBody();
+      }catch(err){ console.error(err); }
+    };
+    expand.appendChild(del);
+
+    list.appendChild(row);
+  });
+}
+
+/* init */
+if(USING_BACKEND){
+  // Wake the Apps Script up so the first submit/load isn't slow.
+  try{ fetch(SCRIPT_URL + '?action=ping&t=' + Date.now(), {mode:'no-cors'}); }catch(e){}
+}
+startChat();
+</script>
+</body>
+</html>
